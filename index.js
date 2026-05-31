@@ -21,16 +21,26 @@ var my4399UnityModule = (function () {
             }
             FS.mkdir("/idbfs");
             FS.mount(IDBFS, {}, "/idbfs");
-
-            try {
+            for (
+              var pageUrl = window.location.href.split("?")[0].split("#")[0],
+                baseUrl =
+                  pageUrl.charAt(pageUrl.length - 1) === "/"
+                    ? pageUrl.slice(0, -1)
+                    : pageUrl.substring(0, pageUrl.lastIndexOf("/")),
+                fileSystemPath =
+                  "/" + baseUrl.replace(/^([a-zA-Z]+):\/\//, "$1:/"),
+                parts = fileSystemPath.split("/"),
+                currentPath = "",
+                i = 1;
+              i < parts.length;
+              i++
+            ) {
+              if (!parts[i]) continue;
+              currentPath += "/" + parts[i];
               try {
-                FS.mkdir("/http:");
-              } catch (e) {}
-              try {
-                FS.mkdir("/http:/127.0.0.1:5500");
-              } catch (e) {}
-            } catch (e) {}
-
+                FS.mkdir(currentPath);
+              } catch (error) {}
+            }
             Module.addRunDependency("JS_FileSystem_Mount");
             FS.syncfs(true, function (err) {
               Module.removeRunDependency("JS_FileSystem_Mount");
